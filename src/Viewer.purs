@@ -5,7 +5,7 @@ import Prelude
 import Data.Array (concat, replicate, (..))
 import Data.ArrayBuffer.Typed (set)
 import Data.Complex (Complex(..), imag, real)
-import Data.Int (ceil, floor, toNumber)
+import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Tuple.Nested ((/\))
 import Data.UInt (fromInt)
@@ -34,8 +34,9 @@ initialOffset :: ViewerOffset
 initialOffset = {position: {x: canvasSize.width / 2, y: canvasSize.height / 2}, scale: 160.0}
 
 loopNum :: Int
-loopNum = 50
+loopNum = 30
 
+zoomScale :: Number
 zoomScale = 1.2
 
 positionToComplex :: ViewerOffset -> Position -> Complex Number
@@ -48,6 +49,7 @@ complexToPosition offset z =
   { x: offset.position.x + floor (real z * offset.scale)
   , y: offset.position.y - floor (imag z * offset.scale)
   }
+
 
 component :: forall q i o. H.Component q i o Aff
 component = Hooks.component \_ _ -> Hooks.do
@@ -76,7 +78,7 @@ component = Hooks.component \_ _ -> Hooks.do
       pure unit
     pure Nothing
 
-  Hooks.pure $ HH.canvas 
+  Hooks.pure $ HH.canvas
     [ HP.id "canvas"
     , HP.width canvasSize.width
     , HP.height canvasSize.height
