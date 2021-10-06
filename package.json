@@ -4,12 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -r output .lock .cache",
+    "test": "npx spago test",
+    "deploy:spago": "npx spago bundle-app --main Main --to './public/index.js'",
+    "watch:spago": "npx spago build --watch",
+    "watch:webpack-server": "npx webpack-dev-server",
+    "watch": "npx concurrently \"npm run watch:spago\" \"npm run watch:webpack-server\"",
+    "deploy": "npm run deploy:spago"
   },
   "author": "yukikurage",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^6.3.0",
     "purescript": "^0.14.4",
-    "spago": "^0.20.3"
+    "spago": "^0.20.3",
+    "webpack": "^5.56.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.3.1"
   }
 }
