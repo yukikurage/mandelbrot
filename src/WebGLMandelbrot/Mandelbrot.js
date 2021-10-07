@@ -3,8 +3,7 @@
 // module WebGLMandelbrot.Mandelbrot
 
 exports.drawMandelbrot = canvas => () => {
-    var gl = canvas.getContext("webgl", {antialias: false})
-    var context = canvas.getContext("2d")
+    var gl = canvas.getContext("webgl", {antialias: true})
 
     gl.clearColor(1.0, 1.0, 1.0, 1.0) //Red,Green,Blue,Alpha
     gl.clear(gl.COLOR_BUFFER_BIT)
@@ -29,19 +28,19 @@ exports.drawMandelbrot = canvas => () => {
     #define loopNum 100.0
 
     precision mediump float;
-    
+
     uniform float t;
     uniform vec2 r;
-    
+
     uniform vec2 offset;
     uniform float scale;
-    
+
     const float PI = 3.141592653589793;
-    
+
     float atanY(in float y){
         return atan(y, 1.0);
     }
-    
+
     float mandelbrot(in vec2 c){
         vec2 z = vec2(0.0, 0.0);
         float n = 0.0;
@@ -93,23 +92,70 @@ exports.drawMandelbrot = canvas => () => {
 
     var initTime = new Date().getTime()
 
+    var scale =  canvas.width / 4
+    var offset = {x: -0.746684956561724, y: -0.148407254991549}
+
+    var isMouseHover = false
+    var mousePosition = {x: 0, y: 0}
+
     const render = () => {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
         gl.useProgram(program);
 
         var t = gl.getUniformLocation(program, "t")
         var r = gl.getUniformLocation(program, "r")
-        var offset = gl.getUniformLocation(program, "offset")
-        var scale = gl.getUniformLocation(program, "scale")
+        var uniformOffset = gl.getUniformLocation(program, "offset")
+        var uniformScale = gl.getUniformLocation(program, "scale")
 
         var time = (new Date().getTime() - initTime) * 0.001
 
+
         gl.uniform1f(t, time)
         gl.uniform2f(r, canvas.width, canvas.height)
-        gl.uniform2f(offset, -0.746684956561724, -0.148407254991549)
-        gl.uniform1f(scale, canvas.width * Math.pow(2, time) / 4)
+
+        if(isMouseHover){
+            if(mousePosition.x > canvas.width * 0.7){
+                offset = {x: offset.x + 3 / scale, y: offset.y}
+            }
+            if(mousePosition.x < canvas.width * 0.3){
+                offset = {x: offset.x - 3 / scale, y: offset.y}
+            }
+            if(mousePosition.y > canvas.height * 0.7){
+                offset = {x: offset.x, y: offset.y - 3 / scale}
+            }
+            if(mousePosition.y < canvas.height * 0.3){
+                offset = {x: offset.x, y: offset.y + 3 / scale}
+            }
+        }
+
+        gl.uniform2f(uniformOffset, offset.x, offset.y)
+        gl.uniform1f(uniformScale, scale)
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, verticesNum)
+    }
+
+    canvas.onmousewheel = function(event){
+        if(event.wheelDelta > 0){
+            scale *= 1.06
+        }else{
+            scale /= 1.06
+        }
+    }
+
+    canvas.onmousemove = function(event){
+        var rect = canvas.getBoundingClientRect()
+        mousePosition.x = event.clientX - rect.x
+        mousePosition.y = event.clientY - rect.y
+    }
+
+    canvas.onmouseover = function() {
+        isMouseHover = true;
+    }
+
+    canvas.onmouseout = function() {
+        isMouseHover = false;
     }
 
     setInterval(render, 1000 / 60);
