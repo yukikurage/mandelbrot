@@ -115,18 +115,21 @@ exports.drawMandelbrot = canvas => () => {
         gl.uniform2f(r, canvas.width, canvas.height)
 
         if(isMouseHover){
-            if(mousePosition.x > canvas.width * 0.7){
-                offset = {x: offset.x + 3 / scale, y: offset.y}
+            var xSpeed = 0.0
+            var ySpeed = 0.0
+            if(mousePosition.x > canvas.width * 0.8){
+                xSpeed += (mousePosition.x - canvas.width * 0.8) * 0.04 / scale
             }
-            if(mousePosition.x < canvas.width * 0.3){
-                offset = {x: offset.x - 3 / scale, y: offset.y}
+            if(mousePosition.x < canvas.width * 0.2){
+                xSpeed += (mousePosition.x - canvas.width * 0.2) * 0.04 / scale
             }
-            if(mousePosition.y > canvas.height * 0.7){
-                offset = {x: offset.x, y: offset.y - 3 / scale}
+            if(mousePosition.y > canvas.height * 0.8){
+                ySpeed -= (mousePosition.y - canvas.height * 0.8) * 0.04 / scale
             }
-            if(mousePosition.y < canvas.height * 0.3){
-                offset = {x: offset.x, y: offset.y + 3 / scale}
+            if(mousePosition.y < canvas.height * 0.2){
+                ySpeed -= (mousePosition.y - canvas.height * 0.2) * 0.04 / scale
             }
+            offset = {x: offset.x + xSpeed, y: offset.y + ySpeed}
         }
 
         gl.uniform2f(uniformOffset, offset.x, offset.y)
