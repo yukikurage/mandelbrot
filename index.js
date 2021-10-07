@@ -8809,10 +8809,16 @@ var PS = {};
       var initTime = new Date().getTime()
 
       var scale =  canvas.width / 4
-      var offset = {x: -0.746684956561724, y: -0.148407254991549}
+      var offset = {x: 0, y: 0}
 
       var isMouseHover = false
+      var isMouseDown = false
       var mousePosition = {x: 0, y: 0}
+      var mouseDownedPosition = {x: 0, y: 0}
+      var mouseDownedOffset = {x: 0, y: 0}
+      var prevOffset = {x: 0, y: 0}
+
+      var scrollSpeed = {x: 0, y: 0}
 
       const render = () => {
           gl.viewport(0, 0, canvas.width, canvas.height);
@@ -8826,26 +8832,38 @@ var PS = {};
 
           var time = (new Date().getTime() - initTime) * 0.001
 
-
           gl.uniform1f(t, time)
           gl.uniform2f(r, canvas.width, canvas.height)
-
-          if(isMouseHover){
-              var xSpeed = 0.0
-              var ySpeed = 0.0
-              if(mousePosition.x > canvas.width * 0.8){
-                  xSpeed += (mousePosition.x - canvas.width * 0.8) * 0.04 / scale
-              }
-              if(mousePosition.x < canvas.width * 0.2){
-                  xSpeed += (mousePosition.x - canvas.width * 0.2) * 0.04 / scale
-              }
-              if(mousePosition.y > canvas.height * 0.8){
-                  ySpeed -= (mousePosition.y - canvas.height * 0.8) * 0.04 / scale
-              }
-              if(mousePosition.y < canvas.height * 0.2){
-                  ySpeed -= (mousePosition.y - canvas.height * 0.2) * 0.04 / scale
-              }
-              offset = {x: offset.x + xSpeed, y: offset.y + ySpeed}
+  /*
+        if(isMouseHover){
+            scrollSpeed.x = 0
+            scrollSpeed.y = 0
+            if(mousePosition.x > canvas.width * 0.8){
+                scrollSpeed.x += (mousePosition.x - canvas.width * 0.8) * 0.04 / scale
+            }
+            if(mousePosition.x < canvas.width * 0.2){
+                scrollSpeed.x += (mousePosition.x - canvas.width * 0.2) * 0.04 / scale
+            }
+            if(mousePosition.y > canvas.height * 0.8){
+                scrollSpeed.y += (mousePosition.y - canvas.height * 0.8) * 0.04 / scale
+            }
+            if(mousePosition.y < canvas.height * 0.2){
+                scrollSpeed.y += (mousePosition.y - canvas.height * 0.2) * 0.04 / scale
+            }
+            offset = {x: offset.x + scrollSpeed.x, y: offset.y + scrollSpeed.y}
+        }
+*/  
+          if(isMouseDown){
+              offset.x = mouseDownedOffset.x - (mousePosition.x - mouseDownedPosition.x) / scale
+              offset.y = mouseDownedOffset.y - (mousePosition.y - mouseDownedPosition.y) / scale
+              scrollSpeed.x = offset.x - prevOffset.x
+              scrollSpeed.y = offset.y - prevOffset.y
+          }
+          else
+          {
+              scrollSpeed.x = scrollSpeed.x / 1.05
+              scrollSpeed.y = scrollSpeed.y / 1.05
+              offset = {x: offset.x + scrollSpeed.x, y: offset.y + scrollSpeed.y}
           }
 
           gl.uniform2f(uniformOffset, offset.x, offset.y)
@@ -8853,20 +8871,29 @@ var PS = {};
 
           gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, verticesNum)
+
+          prevOffset.x = offset.x
+          prevOffset.y = offset.y
       }
 
       canvas.onmousewheel = function(event){
+          var xComplex = (mousePosition.x - canvas.width / 2) / scale + offset.x
+          var yComplex = (mousePosition.y - canvas.height / 2) / scale + offset.y
           if(event.wheelDelta > 0){
               scale *= 1.06
+              offset.x = xComplex - (xComplex - offset.x) / 1.08
+              offset.y = yComplex - (yComplex - offset.y) / 1.08
           }else{
               scale /= 1.06
+              offset.x = xComplex - (xComplex - offset.x) * 1.08
+              offset.y = yComplex - (yComplex - offset.y) * 1.08
           }
       }
 
       canvas.onmousemove = function(event){
           var rect = canvas.getBoundingClientRect()
           mousePosition.x = event.clientX - rect.x
-          mousePosition.y = event.clientY - rect.y
+          mousePosition.y = canvas.height - (event.clientY - rect.y)
       }
 
       canvas.onmouseover = function() {
@@ -8875,6 +8902,19 @@ var PS = {};
 
       canvas.onmouseout = function() {
           isMouseHover = false;
+          isMouseDown = false;
+      }
+
+      canvas.onmousedown = function() {
+          isMouseDown = true
+          mouseDownedPosition.x = mousePosition.x
+          mouseDownedPosition.y = mousePosition.y
+          mouseDownedOffset.x = offset.x
+          mouseDownedOffset.y = offset.y
+      }
+
+      canvas.onmouseup = function() {
+          isMouseDown = false
       }
 
       setInterval(render, 1000 / 60);
