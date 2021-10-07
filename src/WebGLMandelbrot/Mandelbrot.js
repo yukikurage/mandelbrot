@@ -165,12 +165,12 @@ exports.drawMandelbrot = canvas => () => {
         var yComplex = (mousePosition.y - canvas.height / 2) / scale + offset.y
         if(event.wheelDelta > 0){
             scale *= 1.06
-            offset.x = xComplex - (xComplex - offset.x) / 1.08
-            offset.y = yComplex - (yComplex - offset.y) / 1.08
+            offset.x = xComplex - (xComplex - offset.x) / 1.06
+            offset.y = yComplex - (yComplex - offset.y) / 1.06
         }else{
             scale /= 1.06
-            offset.x = xComplex - (xComplex - offset.x) * 1.08
-            offset.y = yComplex - (yComplex - offset.y) * 1.08
+            offset.x = xComplex - (xComplex - offset.x) * 1.06
+            offset.y = yComplex - (yComplex - offset.y) * 1.06
         }
     }
 
