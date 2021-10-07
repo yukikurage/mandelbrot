@@ -138,8 +138,8 @@ exports.drawMandelbrot = canvas => () => {
         }
 */
         if(isMouseDown){
-            offset.x = mouseDownedOffset.x - (mousePosition.x - mouseDownedPosition.x) / scale
-            offset.y = mouseDownedOffset.y - (mousePosition.y - mouseDownedPosition.y) / scale
+            offset.x = Math.max (-2, Math.min(2, mouseDownedOffset.x - (mousePosition.x - mouseDownedPosition.x) / scale))
+            offset.y = Math.max (-2, Math.min(2, mouseDownedOffset.y - (mousePosition.y - mouseDownedPosition.y) / scale))
             scrollSpeed.x = offset.x - prevOffset.x
             scrollSpeed.y = offset.y - prevOffset.y
         }
@@ -147,7 +147,10 @@ exports.drawMandelbrot = canvas => () => {
         {
             scrollSpeed.x = scrollSpeed.x / 1.05
             scrollSpeed.y = scrollSpeed.y / 1.05
-            offset = {x: offset.x + scrollSpeed.x, y: offset.y + scrollSpeed.y}
+            offset = {
+                x: Math.max (-2, Math.min(2, offset.x + scrollSpeed.x)),
+                y: Math.max (-2, Math.min(2, offset.y + scrollSpeed.y))
+            }
         }
 
         gl.uniform2f(uniformOffset, offset.x, offset.y)
@@ -158,16 +161,19 @@ exports.drawMandelbrot = canvas => () => {
 
         prevOffset.x = offset.x
         prevOffset.y = offset.y
+
+        gl.flush()
     }
 
     canvas.onmousewheel = function(event){
         var xComplex = (mousePosition.x - canvas.width / 2) / scale + offset.x
         var yComplex = (mousePosition.y - canvas.height / 2) / scale + offset.y
-        if(event.wheelDelta > 0){
+        if(event.wheelDelta > 0 && scale < canvas.width * (Math.pow(2, 16))){
             scale *= 1.06
             offset.x = xComplex - (xComplex - offset.x) / 1.06
             offset.y = yComplex - (yComplex - offset.y) / 1.06
-        }else{
+        }
+        if(event.wheelDelta < 0 && scale > canvas.width / 8){
             scale /= 1.06
             offset.x = xComplex - (xComplex - offset.x) * 1.06
             offset.y = yComplex - (yComplex - offset.y) * 1.06
