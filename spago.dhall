@@ -24,12 +24,17 @@ to generate this file without the comments in this block.
   , "halogen"
   , "halogen-hooks"
   , "integers"
+  , "js-date"
   , "lists"
   , "maybe"
+  , "now"
   , "prelude"
   , "psci-support"
   , "tuples"
   , "uint"
+  , "web-events"
+  , "web-html"
+  , "web-uievents"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

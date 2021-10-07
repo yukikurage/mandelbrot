@@ -6,7 +6,7 @@ import Effect (Effect)
 import Effect.Class.Console (log)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
-import Viewer (component)
+import WebGLMandelbrot.Mandelbrot (component)
 
 main :: Effect Unit
 main = HA.runHalogenAff do
