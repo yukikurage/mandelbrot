@@ -8752,6 +8752,7 @@ var PS = {};
   // module WebGLMandelbrot.Mandelbrot
 
   var scale;
+  var isShoot;
 
   exports.drawMandelbrot = canvas => () => {
       var gl = canvas.getContext("webgl", {antialias: true})
@@ -8914,6 +8915,19 @@ var PS = {};
           prevOffset.y = offset.y
 
           gl.flush()
+
+          if (isShoot) {
+              let link = document.createElement("a");
+
+              link.href = canvas.toDataURL("image/png");
+              link.download = "mandelbrot.png";
+              link.click();
+
+              canvas.width = canvas.width / 2
+              canvas.height = canvas.height / 2
+              scale = scale / 2
+              isShoot = false;
+          }
       }
 
       canvas.onmousewheel = function(event){
@@ -8962,23 +8976,11 @@ var PS = {};
   }
 
   exports.shoot = canvas => () => {
-      canvas.width = canvas.width * 3
-      canvas.height = canvas.height * 3
-      scale = scale * 3
+      canvas.width = canvas.width * 2
+      canvas.height = canvas.height * 2
+      scale = scale * 2
 
-      const render = () => {
-          let link = document.createElement("a");
-
-          link.href = canvas.toDataURL("image/png");
-          link.download = "mandelbrot.png";
-          link.click();
-
-          canvas.width = canvas.width / 3
-          canvas.height = canvas.height / 3
-          scale = scale / 3
-      }
-
-      setTimeout(render, 1000 / 30)
+      isShoot = true
   }
 })(PS["WebGLMandelbrot.Mandelbrot"] = PS["WebGLMandelbrot.Mandelbrot"] || {});
 (function(exports) {
