@@ -91,9 +91,9 @@ component = Hooks.component \_ _ -> Hooks.do
       ]
     , HH.div
       [ HP.style "left: 40px; bottom: 10px; font-size: 20px; position: absolute; height: auto; margin: 10px 10px 10px 10px; display: flex; flex-direction: column; font-family: 'Montserrat', sans-serif; font-size: 15px;"]
-      [ makeColorSetter setColorInner "#ffffff" "Inner" colorInnerId colorInner
-      , makeColorSetter setColorOuterZero "#ffffff" "Outer Zero" colorOuterZeroId colorOuterZero
-      , makeColorSetter setColorOuterMax "#000000" "Outer Max" colorOuterMaxId colorOuterMax
+      [ makeColorSetter setColorInner "#ffffff" "Inside" colorInnerId colorInner
+      , makeColorSetter setColorOuterZero "#ffffff" "Outside Zero" colorOuterZeroId colorOuterZero
+      , makeColorSetter setColorOuterMax "#000000" "Outside Max" colorOuterMaxId colorOuterMax
       ]
     ]
 
