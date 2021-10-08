@@ -8777,7 +8777,7 @@ var PS = {};
 
       var fShader = gl.createShader(gl.FRAGMENT_SHADER)
       const fSource = `
-    #define loopNum 100.0
+    #define loopNum 80.0
 
     precision mediump float;
 
@@ -8929,6 +8929,8 @@ var PS = {};
               scale = scale / 2
               isShoot = false;
           }
+
+          setTimeout(render, 1000 / 60)
       }
 
       canvas.onmousewheel = function(event){
@@ -8973,7 +8975,7 @@ var PS = {};
           isMouseDown = false
       }
 
-      setInterval(render, 1000 / 60);
+      render()
   }
 
   exports.shoot = canvas => () => {
