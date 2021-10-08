@@ -13,28 +13,19 @@ to generate this file without the comments in this block.
 { name = "my-project"
 , dependencies =
   [ "aff"
-  , "arraybuffer"
-  , "arrays"
   , "canvas"
-  , "colors"
   , "console"
   , "effect"
   , "exceptions"
-  , "foldable-traversable"
   , "halogen"
   , "halogen-hooks"
   , "integers"
-  , "js-date"
-  , "lists"
   , "maybe"
-  , "now"
   , "prelude"
   , "psci-support"
   , "tuples"
-  , "uint"
   , "web-events"
   , "web-html"
-  , "web-uievents"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

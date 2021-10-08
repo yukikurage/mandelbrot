@@ -1,6 +1,6 @@
 "use strict";
 
-// module WebGLMandelbrot.Mandelbrot
+// module Mandelbrot.Mandelbrot
 
 var scale;
 var isShoot;

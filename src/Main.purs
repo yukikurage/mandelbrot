@@ -3,10 +3,9 @@ module Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Class.Console (log)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
-import WebGLMandelbrot.Mandelbrot (component)
+import Mandelbrot.Mandelbrot (component)
 
 main :: Effect Unit
 main = HA.runHalogenAff do
