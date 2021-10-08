@@ -4,6 +4,9 @@
 
 var scale;
 var isShoot;
+var colorInner = {h: 0, s: 0, v: 1};
+var colorOuterZero = {h: 0, s: 0, v: 1};
+var colorOuterMax = {h: 0, s: 0, v: 0};
 
 exports.drawMandelbrot = canvas => () => {
     var gl = canvas.getContext("webgl", {antialias: true})
@@ -28,45 +31,53 @@ exports.drawMandelbrot = canvas => () => {
 
     var fShader = gl.createShader(gl.FRAGMENT_SHADER)
     const fSource = `
-    #define loopNum 80.0
+#define loopNum 80.0
 
-    precision mediump float;
+precision mediump float;
 
-    uniform float t;
-    uniform vec2 r;
+uniform float t;
+uniform vec2 r;
 
-    uniform vec2 offset;
-    uniform float scale;
+uniform vec2 offset;
+uniform float scale;
 
-    const float PI = 3.141592653589793;
+uniform vec3 color_inner;
+uniform vec3 color_outer_zero;
+uniform vec3 color_outer_max;
 
-    float atanY(in float y){
-        return atan(y, 1.0);
-    }
+const float PI = 3.141592653589793;
 
-    float mandelbrot(in vec2 c){
-        vec2 z = vec2(0.0, 0.0);
-        float n = 0.0;
-        for(float i = 0.0; i < loopNum; i++){
-            z = vec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
-            if(z.x * z.x + z.y * z.y > 4.0){
-                n = i;
-                break;
-            }
+vec3 hsv(vec3 c){
+	vec4 t = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	vec3 p = abs(fract(vec3(c.x) + t.xyz) * 6.0 - vec3(t.w));
+	return c.z * mix(vec3(t.x), clamp(p - vec3(t.x), 0.0, 1.0), c.y);
+}
+
+float mandelbrot(vec2 c){
+    vec2 z = vec2(0.0, 0.0);
+    float n = -1.0;
+    for(float i = 0.0; i < loopNum; i++){
+        z = vec2(z.x * z.x - z.y * z.y + c.x, 2.0 * z.x * z.y + c.y);
+        if(z.x * z.x + z.y * z.y > 4.0){
+            n = i;
+            break;
         }
-        return n;
     }
+    return n;
+}
 
-    void main(void){
-        vec4 col = vec4(1.0,1.0,1.0,1.0);
-        vec2 c = vec2((gl_FragCoord.x - r.x / 2.0) / scale + offset.x, (gl_FragCoord.y - r.y / 2.0) / scale + offset.y);
-        float n = mandelbrot(c);
+void main(void){
+    vec2 c = vec2((gl_FragCoord.x - r.x / 2.0) / scale + offset.x, (gl_FragCoord.y - r.y / 2.0) / scale + offset.y);
+    float n = mandelbrot(c);
 
-        if (n > 0.0){
-            col = vec4(1.0 - n / loopNum, (1.0 - n / loopNum),1.0 - n / loopNum,1.0);
-        }
-        gl_FragColor = col;
+    if (n >= 0.0){
+        gl_FragColor = vec4(hsv(mix(color_outer_zero, color_outer_max, n / loopNum)), 1.0);
     }
+    else
+    {
+        gl_FragColor = vec4(hsv(color_inner), 1.0);
+    }
+}
 `
     gl.shaderSource(fShader, fSource)
     gl.compileShader(fShader)
@@ -116,30 +127,15 @@ exports.drawMandelbrot = canvas => () => {
         var r = gl.getUniformLocation(program, "r")
         var uniformOffset = gl.getUniformLocation(program, "offset")
         var uniformScale = gl.getUniformLocation(program, "scale")
+        var uniformColorInner = gl.getUniformLocation(program, "color_inner")
+        var uniformColorOuterZero = gl.getUniformLocation(program, "color_outer_zero")
+        var uniformColorOuterMax = gl.getUniformLocation(program, "color_outer_max")
 
         var time = (new Date().getTime() - initTime) * 0.001
 
         gl.uniform1f(t, time)
         gl.uniform2f(r, canvas.width, canvas.height)
-/*
-        if(isMouseHover){
-            scrollSpeed.x = 0
-            scrollSpeed.y = 0
-            if(mousePosition.x > canvas.width * 0.8){
-                scrollSpeed.x += (mousePosition.x - canvas.width * 0.8) * 0.04 / scale
-            }
-            if(mousePosition.x < canvas.width * 0.2){
-                scrollSpeed.x += (mousePosition.x - canvas.width * 0.2) * 0.04 / scale
-            }
-            if(mousePosition.y > canvas.height * 0.8){
-                scrollSpeed.y += (mousePosition.y - canvas.height * 0.8) * 0.04 / scale
-            }
-            if(mousePosition.y < canvas.height * 0.2){
-                scrollSpeed.y += (mousePosition.y - canvas.height * 0.2) * 0.04 / scale
-            }
-            offset = {x: offset.x + scrollSpeed.x, y: offset.y + scrollSpeed.y}
-        }
-*/
+
         if(isMouseDown){
             offset.x = Math.max (-2, Math.min(2, mouseDownedOffset.x - (mousePosition.x - mouseDownedPosition.x) / scale))
             offset.y = Math.max (-2, Math.min(2, mouseDownedOffset.y - (mousePosition.y - mouseDownedPosition.y) / scale))
@@ -179,6 +175,10 @@ exports.drawMandelbrot = canvas => () => {
             scale = scale / 2
             isShoot = false;
         }
+
+        gl.uniform3f(uniformColorInner, colorInner.h, colorInner.s, colorInner.v)
+        gl.uniform3f(uniformColorOuterZero, colorOuterZero.h, colorOuterZero.s, colorOuterZero.v)
+        gl.uniform3f(uniformColorOuterMax, colorOuterMax.h, colorOuterMax.s, colorOuterMax.v)
 
         setTimeout(render, 1000 / 60)
     }
@@ -234,4 +234,16 @@ exports.shoot = canvas => () => {
     scale = scale * 2
 
     isShoot = true
+}
+
+exports.setColorInner = i => () => {
+    colorInner = i
+}
+
+exports.setColorOuterZero = o_zero => () => {
+    colorOuterZero = o_zero
+}
+
+exports.setColorOuterMax = o_max => () => {
+    colorOuterMax = o_max
 }
