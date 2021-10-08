@@ -184,7 +184,7 @@ exports.drawMandelbrot = canvas => () => {
         setTimeout(render, 1000 / 60)
     }
 
-    canvas.onmousewheel = function(event){
+    canvas.onwheel = function(event){
         var xComplex = (mousePosition.x - canvas.width / 2) / scale + offset.x
         var yComplex = (mousePosition.y - canvas.height / 2) / scale + offset.y
         if(event.wheelDelta > 0 && scale < canvas.width * (Math.pow(2, 16))){
