@@ -46,11 +46,27 @@ component = Hooks.component \_ _ -> Hooks.do
       ]
     , HH.i
       [ css "fas fa-camera"
-      , HP.style "right: 40px; bottom: 40px; font-size: 30px; position: absolute; cursor: pointer;"
+      , HP.style "right: 40px; bottom: 10px; font-size: 20px; position: absolute; cursor: pointer; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;"
       , HE.onClick \_ -> liftEffect do
         canvas <- maybe (throw "canvas要素が取得できませんでした") pure =<< getCanvasElementById "canvas"
         shoot canvas
       ] []
+    , HH.div
+      [ HP.style "left: 40px; bottom: 10px; font-size: 15px; font-family: 'Montserrat', sans-serif; position: absolute; width: auto; height: 50px; display: flex; align-items: center; justify-content: center;"]
+      [
+        HH.text "YUKIWORKS"
+      , HH.a
+        [ HP.href "https://yukikurage.github.io/portfolio/"
+        , HP.style "position:absolute; width: 100%; height: 100%; left: 0; top: 0;"
+        , HP.target "_blank"
+        , HP.rel "noopener"
+        ][]
+      ]
+    , HH.div
+      [ HP.style "left: 40px; top: 10px; font-size: 20px; font-family: 'Montserrat', sans-serif; position: absolute; width: auto; height: 50px; display: flex; align-items: center; justify-content: center;"]
+      [
+        HH.text "MANDELBROT"
+      ]
     ]
 
 css :: forall r m. String -> IProp (class :: String | r) m

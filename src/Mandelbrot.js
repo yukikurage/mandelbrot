@@ -166,7 +166,6 @@ exports.drawMandelbrot = canvas => () => {
         prevOffset.y = offset.y
 
         gl.flush()
-
         if (isShoot) {
             let link = document.createElement("a");
 
