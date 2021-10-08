@@ -8925,6 +8925,7 @@ var PS = {};
 
               canvas.width = canvas.width / 2
               canvas.height = canvas.height / 2
+              console.log(canvas.width)
               scale = scale / 2
               isShoot = false;
           }
