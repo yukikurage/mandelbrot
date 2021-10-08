@@ -17,6 +17,7 @@ import Halogen.Hooks as Hooks
 import Mandelbrot.Hooks.UseWindowSize (useWindowSize)
 
 foreign import drawMandelbrot :: CanvasElement -> Effect Unit
+foreign import shoot :: CanvasElement -> Effect Unit
 
 type ViewerOffset = {position :: Position, scale :: Number} -- 真ん中の複素数, scale: 拡大率
 type CanvasSize = {width :: Int, height :: Int}
@@ -35,13 +36,20 @@ component = Hooks.component \_ _ -> Hooks.do
 
   windowSize <- fromMaybe {width:640, height:640} <$> useWindowSize
 
-  Hooks.pure $ HH.div [HP.style "width: 100%; height: 100%;"]
+  Hooks.pure $ HH.div [HP.style "width: 100vw; height: 100vh; position: relative;"] $
     [ HH.canvas
       [ HP.id "canvas"
-      --, HP.style $ "width:" <> show canvasSize.width <> "px; height:" <> show canvasSize.height <> "px;"
+      , HP.style $ "position: absolute;" <> "width: " <> show windowSize.width <> "px; height: " <> show windowSize.height <> "px;"
       , HP.width $ floor $ toNumber windowSize.width * 1.0
       , HP.height $ floor $ toNumber windowSize.height * 1.0
-      , HE.onClick \e -> do
-        pure unit
       ]
+    , HH.i
+      [ css "fas fa-camera"
+      , HP.style "right: 40px; bottom: 40px; font-size: 30px; position: absolute; cursor: pointer;"
+      , HE.onClick \e -> liftEffect do
+        canvas <- maybe (throw "canvas要素が取得できませんでした") pure =<< getCanvasElementById "canvas"
+        shoot canvas
+      ] []
     ]
+
+css str = HP.class_ $ H.ClassName str

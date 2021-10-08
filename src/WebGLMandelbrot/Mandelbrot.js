@@ -2,6 +2,8 @@
 
 // module WebGLMandelbrot.Mandelbrot
 
+var scale;
+
 exports.drawMandelbrot = canvas => () => {
     var gl = canvas.getContext("webgl", {antialias: true})
 
@@ -92,7 +94,7 @@ exports.drawMandelbrot = canvas => () => {
 
     var initTime = new Date().getTime()
 
-    var scale =  canvas.width / 4
+    scale =  canvas.width / 4
     var offset = {x: 0, y: 0}
 
     var isMouseHover = false
@@ -208,4 +210,24 @@ exports.drawMandelbrot = canvas => () => {
     }
 
     setInterval(render, 1000 / 60);
+}
+
+exports.shoot = canvas => () => {
+    canvas.width = canvas.width * 3
+    canvas.height = canvas.height * 3
+    scale = scale * 3
+
+    const render = () => {
+        let link = document.createElement("a");
+
+        link.href = canvas.toDataURL("image/png");
+        link.download = "mandelbrot.png";
+        link.click();
+
+        canvas.width = canvas.width / 3
+        canvas.height = canvas.height / 3
+        scale = scale / 3
+    }
+
+    setTimeout(render, 1000 / 30)
 }
