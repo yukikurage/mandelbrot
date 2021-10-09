@@ -10547,10 +10547,10 @@ void main(void){
               link.download = "mandelbrot.png";
               link.click();
 
-              canvas.width = canvas.width / 2
-              canvas.height = canvas.height / 2
+              canvas.width = canvas.width / 3
+              canvas.height = canvas.height / 3
               console.log(canvas.width)
-              scale = scale / 2
+              scale = scale / 3
               isShoot = false;
           }
 
@@ -10607,9 +10607,9 @@ void main(void){
   }
 
   exports.shoot = canvas => () => {
-      canvas.width = canvas.width * 2
-      canvas.height = canvas.height * 2
-      scale = scale * 2
+      canvas.width = canvas.width * 3
+      canvas.height = canvas.height * 3
+      scale = scale * 3
 
       isShoot = true
   }
