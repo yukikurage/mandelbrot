@@ -9,7 +9,7 @@ import Data.Traversable (sequence)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Exception (throw)
 import Graphics.Canvas (CanvasElement, getCanvasElementById)
 import Halogen (liftEffect)
@@ -17,6 +17,7 @@ import Halogen as H
 import Halogen.HTML (IProp, col)
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties (InputType(..))
 import Halogen.HTML.Properties as HP
 import Halogen.Hooks (HookM, StateId)
 import Halogen.Hooks as Hooks
@@ -32,6 +33,7 @@ foreign import shoot :: CanvasElement -> Effect Unit
 foreign import setColorInner :: ColorData -> Effect Unit
 foreign import setColorOuterZero :: ColorData -> Effect Unit
 foreign import setColorOuterMax :: ColorData -> Effect Unit
+foreign import changeColorMode :: Int -> Effect Unit
 
 type ViewerOffset = {position :: Position, scale :: Number} -- 真ん中の複素数, scale: 拡大率
 type CanvasSize = {width :: Int, height :: Int}
@@ -82,30 +84,47 @@ component = Hooks.component \_ _ -> Hooks.do
         , HP.style "position:absolute; width: 100%; height: 100%; left: 0; top: 0;"
         , HP.target "_blank"
         , HP.rel "noopener"
-        ][]
+        ] []
       ]
+
     , HH.div
       [ HP.style "left: 40px; top: 10px; font-size: 20px; font-family: 'Montserrat', sans-serif; position: absolute; width: auto; height: 50px; display: flex; align-items: center; justify-content: center;"]
       [
         HH.text "MANDELBROT"
       ]
+
     , HH.div
       [ HP.style "left: 40px; bottom: 10px; font-size: 20px; position: absolute; height: auto; margin: 10px 10px 10px 10px; display: flex; flex-direction: column; font-family: 'Montserrat', sans-serif; font-size: 15px;"]
-      [ makeColorSetter setColorInner "#ffffff" "Inside" colorInnerId colorInner
-      , makeColorSetter setColorOuterZero "#ffffff" "Outside Zero" colorOuterZeroId colorOuterZero
-      , makeColorSetter setColorOuterMax "#000000" "Outside Max" colorOuterMaxId colorOuterMax
+      [ makeColorSetter setColorInner "#ffffff" "Inside :" colorInnerId colorInner
+      , makeColorSetter setColorOuterZero "#ffffff" "Outside Zero :" colorOuterZeroId colorOuterZero
+      , makeColorSetter setColorOuterMax "#000000" "Outside Max :" colorOuterMaxId colorOuterMax
+      , HH.div [HP.style "display: flex; flex-direction: row; align-items: center; margin: 10px 10px 10px 0px;"]
+        [ HH.text "Mix Mode:"
+        , HH.input
+          [ HP.type_ InputRadio, HP.value "hsv", HP.name "colorModeRadio", HP.id "colorModeRadioHSV", HP.checked true
+          , HP.style "margin-left: 10px"
+          , HE.onChecked \b -> liftEffect $ when b $ changeColorMode 0]
+        , HH.label [HP.for "colorModeRadioHSV"] [HH.text "HSV"]
+        , HH.input
+          [ HP.type_ InputRadio, HP.value "rgb", HP.name "colorModeRadio", HP.id "colorModeRadioRGB"
+          , HP.style "margin-left: 10px"
+          , HE.onChecked \b -> liftEffect $ when b $ changeColorMode 1
+          ]
+        , HH.label [HP.for "colorModeRadioRGB"] [HH.text "RGB"]
+        ]
       ]
     ]
 
 makeColorSetter :: forall w. (ColorData -> Effect Unit) -> String -> String -> StateId Color -> Color -> HH.HTML w (HookM Aff Unit)
 makeColorSetter setter val tex id color = HH.div [HP.style $ "display: flex; flex-direction: row; align-items: center;"]
   [ HH.div
-    [ HP.style $ "margin: 10px 10px 10px 10px; width: 18px; height: 18px; border: solid 1px #000000; background-color:" <> toHexString color <> ";"
+    [ -- HP.style $ "margin: 10px 10px 10px 10px; width: 18px; height: 18px; border: solid 1px #000000; background-color:" <> toHexString color <> ";"
     ] []
   , HH.text tex
   , HH.input
     [ HP.style "margin: 10px 10px 10px 10px; inherit; background-color:rgba(255,255,255,0); border: 0px solid; font-family: 'Montserrat', sans-serif; font-size: 18px;"
     , HP.value val
+    , HP.type_ InputColor
     , HE.onInput \e -> do
         col <- liftEffect do
           let

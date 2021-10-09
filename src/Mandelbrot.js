@@ -7,6 +7,11 @@ var isShoot;
 var colorInner = {h: 0, s: 0, v: 1};
 var colorOuterZero = {h: 0, s: 0, v: 1};
 var colorOuterMax = {h: 0, s: 0, v: 0};
+var colorMode = 0; //0..HSV, 1..RGB
+
+exports.changeColorMode = c => () => {
+    colorMode = c;
+}
 
 exports.drawMandelbrot = canvas => () => {
     var gl = canvas.getContext("webgl", {antialias: true})
@@ -31,7 +36,7 @@ exports.drawMandelbrot = canvas => () => {
 
     var fShader = gl.createShader(gl.FRAGMENT_SHADER)
     const fSource = `
-#define loopNum 80.0
+#define loopNum 120.0
 
 precision mediump float;
 
@@ -44,6 +49,8 @@ uniform float scale;
 uniform vec3 color_inner;
 uniform vec3 color_outer_zero;
 uniform vec3 color_outer_max;
+
+uniform int color_mode;
 
 const float PI = 3.141592653589793;
 
@@ -71,7 +78,12 @@ void main(void){
     float n = mandelbrot(c);
 
     if (n >= 0.0){
-        gl_FragColor = vec4(hsv(mix(color_outer_zero, color_outer_max, n / loopNum)), 1.0);
+        if (color_mode == 1){
+            gl_FragColor = vec4(mix(hsv(color_outer_zero), hsv(color_outer_max), n / loopNum), 1.0);
+        }
+        if (color_mode == 0){
+            gl_FragColor = vec4(hsv(mix(color_outer_zero, color_outer_max, n / loopNum)), 1.0);
+        }
     }
     else
     {
@@ -130,6 +142,9 @@ void main(void){
         var uniformColorInner = gl.getUniformLocation(program, "color_inner")
         var uniformColorOuterZero = gl.getUniformLocation(program, "color_outer_zero")
         var uniformColorOuterMax = gl.getUniformLocation(program, "color_outer_max")
+        var uniformColorMode = gl.getUniformLocation(program, "color_mode")
+
+        gl.uniform1i(uniformColorMode, colorMode)
 
         var time = (new Date().getTime() - initTime) * 0.001
 
@@ -180,7 +195,7 @@ void main(void){
         gl.uniform3f(uniformColorOuterZero, colorOuterZero.h, colorOuterZero.s, colorOuterZero.v)
         gl.uniform3f(uniformColorOuterMax, colorOuterMax.h, colorOuterMax.s, colorOuterMax.v)
 
-        setTimeout(render, 1000 / 60)
+        setTimeout(render, 1000 / 50)
     }
 
     canvas.onwheel = function(event){
